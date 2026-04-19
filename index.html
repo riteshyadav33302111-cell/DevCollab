@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevCollab — Real-Time Project Collaboration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+ <link rel="stylesheet" href="dev.css">
+</head>
+<body>
+
+<div class="app">
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">DC</div>
+    <div class="logo-text">Dev<span>Collab</span></div>
+  </div>
+
+  <div class="workspace-selector" onclick="showToast('Workspace switcher', 'info')">
+    <div class="ws-info">
+      <div class="ws-avatar">NS</div>
+      <div>
+        <div class="ws-name">NovaSpark Inc.</div>
+        <div class="ws-plan">PRO PLAN</div>
+      </div>
+    </div>
+    <span style="color:var(--text3);font-size:11px">⌄</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Workspace</div>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="nav-icon">⚡</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('activity', this)">
+      <span class="nav-icon">📡</span> Activity Feed
+      <span class="nav-badge">12</span>
+    </div>
+    <div class="nav-item" onclick="navigate('members', this)">
+      <span class="nav-icon">👥</span> Members
+    </div>
+    <div class="nav-item" onclick="navigate('notifications', this)">
+      <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-badge">5</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px">Projects</div>
+    <div class="projects-list">
+      <div class="project-item active" onclick="selectProject('athena', this)">
+        <div class="proj-dot" style="background:#6c63ff"></div>
+        <span class="truncate">Athena AI Platform</span>
+      </div>
+      <div class="project-item" onclick="selectProject('devops', this)">
+        <div class="proj-dot" style="background:#06b6d4"></div>
+        <span class="truncate">DevOps Dashboard</span>
+      </div>
+      <div class="project-item" onclick="selectProject('mobile', this)">
+        <div class="proj-dot" style="background:#22c55e"></div>
+        <span class="truncate">Mobile App v2</span>
+      </div>
+      <div class="project-item" onclick="selectProject('api', this)">
+        <div class="proj-dot" style="background:#f59e0b"></div>
+        <span class="truncate">REST API Gateway</span>
+      </div>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px">Project Views</div>
+    <div class="nav-item" onclick="navigate('kanban', this)">
+      <span class="nav-icon">📋</span> Kanban Board
+    </div>
+    <div class="nav-item" onclick="navigate('snippets', this)">
+      <span class="nav-icon">⌨️</span> Code Snippets
+    </div>
+    <div class="nav-item" onclick="navigate('wiki', this)">
+      <span class="nav-icon">📖</span> Wiki / Docs
+    </div>
+    <div class="nav-item" onclick="navigate('ai', this)">
+      <span class="nav-icon">🤖</span> AI Assistant
+    </div>
+    <div class="nav-item" onclick="navigate('review', this)">
+      <span class="nav-icon">🔍</span> Code Review
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px">Settings</div>
+    <div class="nav-item" onclick="navigate('pricing', this)">
+      <span class="nav-icon">💎</span> Upgrade Plan
+    </div>
+    <div class="nav-item" onclick="navigate('profile', this)">
+      <span class="nav-icon">⚙️</span> Settings
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="user-card" onclick="navigate('profile', document.querySelector('.nav-item:last-child'))">
+      <div class="user-avatar">AK</div>
+      <div class="user-info">
+        <div class="user-name">Ankush Kumar</div>
+        <div class="user-role">Owner · Full Stack Dev</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-search" onclick="openSearch()">
+      <span>🔍</span> Search tasks, docs, snippets...
+      <kbd>⌘K</kbd>
+    </div>
+
+    <div class="presence-bar" id="presence-bar">
+      <div class="presence-avatar" style="background:linear-gradient(135deg,#6c63ff,#ec4899)" data-tip="Ankush Kumar (you)">AK</div>
+      <div class="presence-avatar" style="background:linear-gradient(135deg,#06b6d4,#22c55e)" data-tip="Riya Sharma">RS</div>
+      <div class="presence-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)" data-tip="Dev Patel">DP</div>
+      <div class="live-dot" data-tip="3 members online"></div>
+    </div>
+
+    <button class="btn-icon" onclick="toggleNotifPanel()" data-tip="Notifications">🔔</button>
+    <button class="btn-icon" onclick="openModal('invite-modal')" data-tip="Invite member">➕</button>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ─── DASHBOARD VIEW ─── -->
+    <div class="view active" id="view-dashboard">
+      <div class="welcome-banner">
+        <div class="welcome-title">Good morning, Ankush 👋</div>
+        <div class="welcome-sub">You have <strong style="color:var(--accent2)">7 tasks</strong> in progress across 4 projects. Riya moved a task to <em>In Review</em> 10 min ago.</div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Total Tasks</div>
+          <div class="stat-value" style="color:var(--accent2)">48</div>
+          <div class="stat-sub">+6 this week</div>
+          <div style="margin-top:10px">
+            <div class="sparkline" id="spark1"></div>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" style="color:var(--green)">31</div>
+          <div class="stat-sub">64.5% completion rate</div>
+          <div style="margin-top:10px">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width:64.5%;background:var(--green)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-label">Overdue</div>
+          <div class="stat-value" style="color:var(--orange)">3</div>
+          <div class="stat-sub">Needs attention</div>
+          <div style="margin-top:10px">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width:6%;background:var(--orange)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-row3">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Project Health</div>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="navigate('ai', document.querySelector('[onclick*=ai]'))">AI Summary</button>
+          </div>
+          <div class="card-body">
+            <div id="project-health-list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🕐 Recent Activity</div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="mini-activity"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-row" style="margin-top:16px">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📅 My Tasks Today</div>
+            <span class="text-sm">Sun 19 Apr</span>
+          </div>
+          <div class="card-body" style="padding:10px 16px">
+            <div id="my-tasks-today"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚡ Quick Actions</div>
+          </div>
+          <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button class="btn btn-ghost w-full" style="justify-content:center;flex-direction:column;height:70px;gap:4px" onclick="openModal('new-task-modal')">
+              <span style="font-size:20px">➕</span>
+              <span style="font-size:11px">New Task</span>
+            </button>
+            <button class="btn btn-ghost w-full" style="justify-content:center;flex-direction:column;height:70px;gap:4px" onclick="navigate('ai', document.querySelector('[onclick*=ai]'))">
+              <span style="font-size:20px">🤖</span>
+              <span style="font-size:11px">AI Standup</span>
+            </button>
+            <button class="btn btn-ghost w-full" style="justify-content:center;flex-direction:column;height:70px;gap:4px" onclick="navigate('snippets', document.querySelector('[onclick*=snippets]'))">
+              <span style="font-size:20px">⌨️</span>
+              <span style="font-size:11px">New Snippet</span>
+            </button>
+            <button class="btn btn-ghost w-full" style="justify-content:center;flex-direction:column;height:70px;gap:4px" onclick="navigate('review', document.querySelector('[onclick*=review]'))">
+              <span style="font-size:20px">🔍</span>
+              <span style="font-size:11px">Code Review</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── KANBAN VIEW ─── -->
+    <div class="view" id="view-kanban" style="padding:0;overflow:hidden">
+      <div class="kanban-wrapper">
+        <div class="kanban-toolbar">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" id="kb-board-btn" onclick="switchKanbanView('board')">Board</button>
+            <button class="view-toggle-btn" id="kb-list-btn" onclick="switchKanbanView('list')">List</button>
+            <button class="view-toggle-btn" id="kb-cal-btn" onclick="switchKanbanView('calendar')">Calendar</button>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="chip active" onclick="filterPriority(this,'all')">All</span>
+            <span class="chip" onclick="filterPriority(this,'P0')">P0</span>
+            <span class="chip" onclick="filterPriority(this,'P1')">P1</span>
+            <span class="chip" onclick="filterPriority(this,'P2')">P2</span>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('new-task-modal')">+ New Task</button>
+        </div>
+
+        <div id="board-view" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+          <div class="kanban-board" id="kanban-board"></div>
+        </div>
+
+        <div id="list-view" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+          <div class="task-list" id="task-list-view"></div>
+        </div>
+
+        <div id="calendar-view" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+          <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+            <button class="btn btn-ghost" onclick="calNav(-1)">←</button>
+            <span class="syne font-bold" id="cal-title" style="font-size:16px">April 2026</span>
+            <button class="btn btn-ghost" onclick="calNav(1)">→</button>
+          </div>
+          <div class="calendar-grid">
+            <div class="cal-header">Sun</div><div class="cal-header">Mon</div><div class="cal-header">Tue</div>
+            <div class="cal-header">Wed</div><div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div>
+          </div>
+          <div class="calendar-grid" id="cal-body" style="margin-top:2px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SNIPPETS VIEW ─── -->
+    <div class="view" id="view-snippets">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div class="syne font-bold" style="font-size:20px">Code Snippets</div>
+          <div class="text-sm" style="margin-top:2px">Reusable code library · 8 snippets</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" style="width:220px;padding:7px 12px" placeholder="🔍 Search snippets..." oninput="filterSnippets(this.value)" id="snippet-search">
+          <button class="btn btn-primary" onclick="openModal('new-snippet-modal')">+ New Snippet</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="snippet-tags-filter">
+        <span class="chip active" onclick="filterSnippetTag(this,'all')">All</span>
+        <span class="chip" onclick="filterSnippetTag(this,'auth')">auth</span>
+        <span class="chip" onclick="filterSnippetTag(this,'api')">api</span>
+        <span class="chip" onclick="filterSnippetTag(this,'utils')">utils</span>
+        <span class="chip" onclick="filterSnippetTag(this,'hooks')">hooks</span>
+        <span class="chip" onclick="filterSnippetTag(this,'db')">db</span>
+      </div>
+
+      <div class="snippets-grid" id="snippets-grid"></div>
+    </div>
+
+    <!-- ─── WIKI VIEW ─── -->
+    <div class="view" id="view-wiki" style="padding:0;overflow:hidden">
+      <div class="wiki-layout">
+        <div class="wiki-sidebar">
+          <div class="wiki-sidebar-title">📖 Pages</div>
+          <button class="btn btn-ghost w-full" style="margin-bottom:10px;font-size:12px" onclick="openModal('new-page-modal')">+ New Page</button>
+          <div id="wiki-pages-list"></div>
+        </div>
+        <div class="wiki-editor">
+          <input class="wiki-title-input" id="wiki-title" value="Getting Started with Athena AI" placeholder="Page Title...">
+          <div class="wiki-toolbar">
+            <button class="wiki-tool" onclick="execCmd('bold')"><strong>B</strong></button>
+            <button class="wiki-tool" onclick="execCmd('italic')"><em>I</em></button>
+            <button class="wiki-tool" onclick="execCmd('underline')"><u>U</u></button>
+            <button class="wiki-tool" onclick="insertHeading(1)">H1</button>
+            <button class="wiki-tool" onclick="insertHeading(2)">H2</button>
+            <button class="wiki-tool" onclick="insertHeading(3)">H3</button>
+            <button class="wiki-tool" onclick="execCmd('insertUnorderedList')">• List</button>
+            <button class="wiki-tool" onclick="execCmd('insertOrderedList')">1. List</button>
+            <button class="wiki-tool" onclick="insertCodeBlock()">{'</>'}Code</button>
+            <button class="wiki-tool" onclick="insertTable()">⊞ Table</button>
+            <button class="wiki-tool" onclick="execCmd('insertHorizontalRule')">— HR</button>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="wiki-tool" onclick="showToast('Version history opened','info')">⟲ History</button>
+              <button class="btn btn-primary" style="font-size:11px;padding:5px 12px" onclick="showToast('Page saved!','success')">Save</button>
+            </div>
+          </div>
+          <div class="wiki-content" id="wiki-content" contenteditable="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── AI ASSISTANT VIEW ─── -->
+    <div class="view ai-view" id="view-ai">
+      <div class="ai-hero">
+        <div class="ai-hero-title">🤖 AI Project Assistant</div>
+        <div class="ai-hero-sub">Powered by Claude · Understands your full project context</div>
+        <div class="ai-quick-actions">
+          <button class="ai-quick-btn" onclick="sendAIMessage('Summarise this project')">📊 Summarise project</button>
+          <button class="ai-quick-btn" onclick="sendAIMessage('What\'s blocking us?')">🚧 What\'s blocking us?</button>
+          <button class="ai-quick-btn" onclick="sendAIMessage('Generate a standup report for today')">📋 Generate standup</button>
+          <button class="ai-quick-btn" onclick="sendAIMessage('Build a login system with OAuth and JWT')">⚡ Break down a feature</button>
+          <button class="ai-quick-btn" onclick="sendAIMessage('Who should I assign the auth tasks to based on skills?')">👤 Suggest assignees</button>
+        </div>
+      </div>
+      <div class="ai-chat-area" id="ai-chat-area">
+        <div class="ai-message">
+          <div class="ai-avatar">🤖</div>
+          <div class="ai-bubble">
+            <h4>Hello, Ankush! 👋</h4>
+            I'm your AI Project Assistant. I have full context about your workspace — all 4 projects, 48 tasks, team members, and recent activity.<br><br>
+            Ask me anything: generate standups, identify blockers, break down features into tasks, or get a health report. What would you like to explore?
+          </div>
+        </div>
+      </div>
+      <div class="ai-input-bar">
+        <textarea class="ai-input" id="ai-input" placeholder="Ask AI anything about your project..." rows="1" onkeydown="handleAIKey(event)"></textarea>
+        <button class="btn btn-primary" onclick="sendAIFromInput()">Send ↑</button>
+      </div>
+    </div>
+
+    <!-- ─── CODE REVIEW VIEW ─── -->
+    <div class="view" id="view-review" style="overflow:hidden;padding:0">
+      <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:12px">
+        <div class="syne font-bold" style="font-size:16px">🔍 AI Code Reviewer</div>
+        <div style="flex:1"></div>
+        <button class="btn btn-primary" onclick="runCodeReview()">▶ Run Review</button>
+      </div>
+      <div style="padding:20px 24px;height:calc(100% - 57px);overflow-y:auto">
+        <div class="code-review-layout">
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <span style="font-size:13px;font-weight:600">Paste your code</span>
+              <select class="lang-selector" id="code-lang">
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+                <option value="go">Go</option>
+              </select>
+              <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="loadSampleCode()">Load Sample</button>
+            </div>
+            <textarea class="code-editor" id="code-editor" placeholder="// Paste your code here and click Run Review...
+function fetchUserData(userId) {
+  var query = 'SELECT * FROM users WHERE id = ' + userId;
+  // ...
+}"></textarea>
+          </div>
+
+          <div class="review-panel">
+            <div class="score-ring-wrap" id="review-score-area">
+              <div class="score-ring" id="score-ring" style="background:conic-gradient(var(--border) 0deg 360deg,var(--border) 0deg 360deg)">
+                <span id="score-val" style="color:var(--text3)">–</span>
+              </div>
+              <div class="score-info">
+                <div class="score-title" id="score-title">Code Quality Score</div>
+                <div class="score-sub" id="score-sub">Run a review to get your score</div>
+              </div>
+            </div>
+            <div class="review-items" id="review-items">
+              <div class="empty-state" style="padding:40px 20px">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-title">No review yet</div>
+                <div class="empty-sub">Paste code and click Run Review</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ACTIVITY FEED ─── -->
+    <div class="view" id="view-activity">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div class="syne font-bold" style="font-size:20px">Activity Feed</div>
+          <div class="text-sm" style="margin-top:2px">All workspace events · real-time</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <span class="chip active" onclick="filterActivity(this,'all')">All</span>
+          <span class="chip" onclick="filterActivity(this,'tasks')">Tasks</span>
+          <span class="chip" onclick="filterActivity(this,'docs')">Docs</span>
+          <span class="chip" onclick="filterActivity(this,'members')">Members</span>
+        </div>
+      </div>
+      <div class="card" style="max-width:760px">
+        <div class="card-body" style="padding:0 20px" id="activity-feed"></div>
+      </div>
+    </div>
+
+    <!-- ─── MEMBERS VIEW ─── -->
+    <div class="view" id="view-members">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div class="syne font-bold" style="font-size:20px">Team Members</div>
+          <div class="text-sm" style="margin-top:2px">5 members · NovaSpark Inc.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('invite-modal')">+ Invite Member</button>
+      </div>
+      <div class="members-grid" id="members-grid"></div>
+    </div>
+
+    <!-- ─── NOTIFICATIONS VIEW ─── -->
+    <div class="view" id="view-notifications">
+      <div style="max-width:660px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="syne font-bold" style="font-size:20px">Notifications</div>
+          <button class="btn btn-ghost" onclick="markAllRead()" style="font-size:12px">Mark all read</button>
+        </div>
+        <div class="card" id="full-notif-list"></div>
+      </div>
+    </div>
+
+    <!-- ─── PRICING VIEW ─── -->
+    <div class="view" id="view-pricing">
+      <div style="text-align:center;margin-bottom:32px">
+        <div class="syne font-bold" style="font-size:28px;margin-bottom:8px">Upgrade Your Plan</div>
+        <div class="text-sm" style="font-size:14px">Unlock unlimited potential for your team</div>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-name">Free</div>
+          <div class="pricing-price">$0<span>/mo</span></div>
+          <div class="pricing-desc">Perfect for solo projects and small experiments.</div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> 1 workspace</div>
+            <div class="pricing-feature"><span class="check">✓</span> 3 projects</div>
+            <div class="pricing-feature"><span class="check">✓</span> 5 members</div>
+            <div class="pricing-feature"><span class="check">✓</span> Kanban board</div>
+            <div class="pricing-feature"><span class="check">✓</span> Code snippets</div>
+            <div class="pricing-feature"><span class="cross">✗</span> AI Assistant</div>
+            <div class="pricing-feature"><span class="cross">✗</span> AI Code Review</div>
+            <div class="pricing-feature"><span class="cross">✗</span> Version history</div>
+            <div class="pricing-feature"><span class="cross">✗</span> Priority support</div>
+          </div>
+          <button class="btn btn-ghost w-full" style="justify-content:center" disabled>Current Plan</button>
+        </div>
+
+        <div class="pricing-card pro">
+          <div class="pro-badge">POPULAR</div>
+          <div class="pricing-name">Pro</div>
+          <div class="pricing-price" style="background:linear-gradient(135deg,var(--accent2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">$19<span style="-webkit-text-fill-color:var(--text3)">/mo</span></div>
+          <div class="pricing-desc">For serious teams building real products.</div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> Unlimited workspaces</div>
+            <div class="pricing-feature"><span class="check">✓</span> Unlimited projects</div>
+            <div class="pricing-feature"><span class="check">✓</span> Unlimited members</div>
+            <div class="pricing-feature"><span class="check">✓</span> Full AI Assistant</div>
+            <div class="pricing-feature"><span class="check">✓</span> AI Code Reviewer</div>
+            <div class="pricing-feature"><span class="check">✓</span> Wiki version history</div>
+            <div class="pricing-feature"><span class="check">✓</span> Real-time presence</div>
+            <div class="pricing-feature"><span class="check">✓</span> Priority support</div>
+          </div>
+          <button class="btn btn-primary w-full" style="justify-content:center" onclick="checkoutPro()">Upgrade to Pro ↗</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PROFILE VIEW ─── -->
+    <div class="view" id="view-profile">
+      <div style="max-width:600px">
+        <div class="syne font-bold" style="font-size:20px;margin-bottom:20px">Profile & Settings</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><div class="card-title">👤 Personal Info</div></div>
+          <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Full Name</label>
+              <input class="form-input" value="Ankush Kumar">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Username</label>
+              <input class="form-input" value="@ankushk">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Email</label>
+              <input class="form-input" value="ankush@novaspark.io">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">GitHub</label>
+              <input class="form-input" value="github.com/ankushk">
+            </div>
+            <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
+              <label class="form-label">Bio</label>
+              <textarea class="form-textarea" style="min-height:60px">Full-stack dev · TypeScript, Go, React · Building Athena AI Platform</textarea>
+            </div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end">
+              <button class="btn btn-primary" onclick="showToast('Profile saved!','success')">Save Changes</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔔 Notification Preferences</div></div>
+          <div class="card-body">
+            <div id="notif-prefs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ─── NOTIFICATIONS PANEL ─── -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <div class="notif-title">🔔 Notifications</div>
+    <span class="notif-clear" onclick="markAllRead()">Mark all read</span>
+  </div>
+  <div id="notif-panel-list"></div>
+</div>
+
+<!-- ─── SEARCH MODAL ─── -->
+<div class="search-modal" id="search-modal">
+  <div class="search-input-wrap">
+    <span style="font-size:16px;color:var(--text3)">🔍</span>
+    <input type="text" placeholder="Search tasks, snippets, docs..." id="global-search-input" oninput="runGlobalSearch(this.value)" autofocus>
+    <kbd style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);padding:2px 6px;border-radius:3px">ESC</kbd>
+  </div>
+  <div class="search-results" id="global-search-results">
+    <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Type to search...</div>
+  </div>
+</div>
+
+<!-- ─── MODALS ─── -->
+
+<!-- New Task Modal -->
+<div class="modal-overlay" id="new-task-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ Create New Task</div>
+      <button class="btn-icon" onclick="closeModal('new-task-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Task Title</label>
+        <input class="form-input" id="new-task-title" placeholder="e.g. Implement OAuth2 login flow">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="new-task-desc" placeholder="What needs to be done?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Assignee</label>
+          <select class="form-select" id="new-task-assignee">
+            <option>Ankush Kumar</option>
+            <option>Riya Sharma</option>
+            <option>Dev Patel</option>
+            <option>Priya Nair</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="new-task-priority">
+            <option value="P0">🔴 P0 — Critical</option>
+            <option value="P1" selected>🟡 P1 — High</option>
+            <option value="P2">🔵 P2 — Normal</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Due Date</label>
+          <input class="form-input" type="date" id="new-task-due" value="2026-04-25">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Labels</label>
+          <input class="form-input" id="new-task-labels" placeholder="auth, backend, api">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px;margin-bottom:0">
+        <label class="form-label">Column</label>
+        <select class="form-select" id="new-task-col">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="review">In Review</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('new-task-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createTask()">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Snippet Modal -->
+<div class="modal-overlay" id="new-snippet-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⌨️ New Code Snippet</div>
+      <button class="btn-icon" onclick="closeModal('new-snippet-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="snip-title" placeholder="e.g. JWT Token Generator">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Language</label>
+          <select class="form-select" id="snip-lang">
+            <option>javascript</option><option>python</option><option>go</option><option>java</option><option>cpp</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Tags (comma-separated)</label>
+          <input class="form-input" id="snip-tags" placeholder="auth, utils, jwt">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Description</label>
+        <input class="form-input" id="snip-desc" placeholder="Brief description...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Code</label>
+        <textarea class="form-textarea" id="snip-code" style="min-height:120px;font-family:'DM Mono',monospace;font-size:12px" placeholder="// paste your code here"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('new-snippet-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSnippet()">Save Snippet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invite Modal -->
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">👥 Invite Team Member</div>
+      <button class="btn-icon" onclick="closeModal('invite-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="invite-email" placeholder="colleague@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="invite-role">
+          <option>Member</option>
+          <option>Admin</option>
+          <option>Viewer</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Or share invite link</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" value="https://devcollab.io/invite/ns-xk9p2w" readonly>
+          <button class="btn btn-ghost" onclick="showToast('Link copied!','success')">Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('invite-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendInvite()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Page Modal -->
+<div class="modal-overlay" id="new-page-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📄 New Wiki Page</div>
+      <button class="btn-icon" onclick="closeModal('new-page-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Page Title</label>
+        <input class="form-input" id="new-page-title" placeholder="e.g. API Documentation">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Template</label>
+        <select class="form-select" id="new-page-template">
+          <option>Blank Page</option>
+          <option>Technical Spec</option>
+          <option>Meeting Notes</option>
+          <option>RFC Template</option>
+          <option>Onboarding Guide</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('new-page-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createWikiPage()">Create Page</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Detail Modal -->
+<div class="modal-overlay" id="task-detail-modal">
+  <div class="modal" style="width:640px">
+    <div class="modal-header">
+      <div class="modal-title" id="td-title">Task Details</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-icon" onclick="closeModal('task-detail-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="td-body"></div>
+      <hr class="dv">
+      <div class="syne font-bold" style="font-size:13px;margin-bottom:10px">💬 Comments</div>
+      <div id="td-comments" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="td-comment-input" placeholder="Add a comment... @mention someone">
+        <button class="btn btn-primary" onclick="addComment()">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Overlay closer -->
+<div id="search-overlay" style="position:fixed;inset:0;z-index:1999;display:none" onclick="closeSearch()"></div>
+<script src="dev.js"></script>
+
+
+</body>
+</html>
