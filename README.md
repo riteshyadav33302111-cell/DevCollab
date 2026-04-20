@@ -9,7 +9,7 @@
 
 | Dashboard | Kanban Board | AI Assistant |
 |-----------|--------------|--------------|
-| Live project health, stats, quick actions | Drag-and-drop with board/list/calendar views | Claude-powered project intelligence |
+| Live project health, stats, quick actions | Drag-and-drop with board/list/calendar views | project intelligence |
 
 | Code Reviewer | Snippets Library | Wiki Editor |
 |---------------|-----------------|-------------|
@@ -119,8 +119,8 @@ Most student developer teams face the same fragmented toolchain problem:
 ### 💎 Payments (Sandbox)
 | Plan | Price | Limits |
 |------|-------|--------|
-| **Free** | $0/mo | 1 workspace · 3 projects · 5 members · No AI |
-| **Pro** | $19/mo | Unlimited everything · Full AI · Version history · Priority support |
+| **Free** | 0/mo | 1 workspace · 3 projects · 5 members · No AI |
+| **Pro** | 19/mo | Unlimited everything · Full AI · Version history · Priority support |
 
 - Sandbox checkout (no real card required in demo mode)
 
@@ -158,28 +158,8 @@ The entire application is intentionally a **single HTML file**. This means:
 
 ---
 
-## ⚙️ Configuration
 
-### Enabling AI Features
 
-The AI Assistant and Code Reviewer call the **Anthropic Claude API** directly from the browser. To use them:
-
-1. The app is pre-configured to hit `https://api.anthropic.com/v1/messages`
-2. You need to either:
-   - Run this through a proxy that injects your API key, **or**
-   - Add your API key to the fetch headers in the source (search for `api.anthropic.com` in `devcollab.html`)
-
-```javascript
-// In devcollab.html, find the fetch call and add your key:
-headers: {
-  'Content-Type': 'application/json',
-  'x-api-key': 'YOUR_ANTHROPIC_API_KEY',      // add this
-  'anthropic-version': '2023-06-01',            // add this
-  'anthropic-dangerous-direct-browser-access': 'true'  // add this for browser calls
-},
-```
-
-> ⚠️ For production, never expose your API key in frontend code. Route AI calls through a backend proxy.
 
 ### Customising the Demo Data
 
@@ -285,7 +265,7 @@ open devcollab.html
 # 5. Submit a pull request
 ```
 
-Contributions welcome — bug fixes, new features, better AI prompts, UI improvements.
+Contributions welcome — bug fixes, new features, UI improvements.
 
 ---
 
