@@ -216,40 +216,7 @@ The app ships with a pre-populated demo workspace:
 | **Snippets** | 6 code snippets |
 | **Wiki pages** | 6 pages with real content |
 
----
 
-## 🗺️ Roadmap
-
-- [ ] Backend integration (Node.js + PostgreSQL + Prisma)
-- [ ] WebSocket real-time sync via Socket.IO
-- [ ] File attachments on tasks (S3 / Cloudflare R2)
-- [ ] OAuth login (GitHub, Google)
-- [ ] Stripe integration for Pro plan billing
-- [ ] Mobile-responsive layout
-- [ ] Wiki page version history (diff viewer)
-- [ ] Export tasks to CSV / GitHub Issues
-- [ ] Slack / Discord webhook notifications
-- [ ] VS Code extension for snippet access
-
----
-
-## 🤝 Contributing
-
-```bash
-# 1. Fork the repo
-# 2. Clone your fork
-git clone https://github.com/your-username/devcollab.git
-
-# 3. Make changes to devcollab.html
-# 4. Test by opening in browser
-open devcollab.html
-
-# 5. Submit a pull request
-```
-
-Contributions welcome — bug fixes, new features, UI improvements.
-
----
 
 ## 📄 License
 
