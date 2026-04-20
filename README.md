@@ -161,24 +161,6 @@ The entire application is intentionally a **single HTML file**. This means:
 
 
 
-### Customising the Demo Data
-
-All workspace data lives in the `state` object at the top of the `<script>` block:
-
-```javascript
-const state = {
-  tasks: [...],      // your tasks
-  snippets: [...],   // your code snippets
-  members: [...],    // your team
-  wikiPages: [...],  // your docs pages
-  activity: [...],   // your activity feed
-  notifications: [...],
-};
-```
-
-Edit these arrays to populate the app with your own project data.
-
----
 
 ## 🎮 Usage Guide
 
